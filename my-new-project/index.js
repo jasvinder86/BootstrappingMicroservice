@@ -1,0 +1,55 @@
+const express = require("express");
+const fs = require("fs");
+
+const app = express();
+
+//
+// Throws an error if the PORT environment variable is missing.
+//
+if (!process.env.PORT) {
+    throw new Error("Please specify the port number for the HTTP server with the environment variable PORT.");
+}
+
+//
+// Extracts the PORT environment variable.
+//
+const PORT = process.env.PORT;
+
+//
+// Registers a HTTP GET route for video streaming.
+//
+// Original code for this:
+// https://medium.com/better-programming/video-stream-with-node-js-and-html5-320b3191a6b6
+//
+app.get("/video", (req, res) => {
+
+    //
+    // Original video from here:
+    // https://sample-videos.com
+    //
+    // const path = "/Users/jasvindersinghchugh/Documents/Jas/Learning/BootstrappingMicroservices/my-new-project/video/myVideo.mp4";
+    const path = "../my-new-project/video/myVideo.mp4";
+    console.log("Path is ", path);
+
+    
+    fs.stat(path, (err, stats) => {
+        if (err) {
+            console.error("An error occurred ");
+            res.sendStatus(500);
+            return;
+        }
+
+        res.writeHead(200, {
+            "Content-Length": stats.size,
+            "Content-Type": "video/mp4",
+        });
+        fs.createReadStream(path).pipe(res);
+    });
+});
+
+//
+// Starts the HTTP server.
+//
+app.listen(PORT, () => {
+    console.log(`Microservice listening on port ${PORT}, point your browser at http://localhost:${PORT}/video`);
+});
